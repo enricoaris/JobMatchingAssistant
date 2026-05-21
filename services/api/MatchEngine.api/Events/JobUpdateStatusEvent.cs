@@ -1,0 +1,13 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Resume.Shared.Events
+{
+    public class JobUpdateStatusEvent
+    {
+        public Guid Id { get; set; }
+        public string? Status { get; set; }
+        public string? SessionId { get; set; }
+    }
+}
