@@ -2,7 +2,7 @@
 import asyncio
 from messaging.rabbit_client import RabbitClient
 from enums import QueueName
-from processing_service import process_job, process_resume, process_insights
+from processors.document_processor import process_job, process_resume, process_insights
 
 async def main():
     client = RabbitClient()

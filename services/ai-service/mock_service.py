@@ -1,7 +1,7 @@
 import time
 import random
 
-def generate_mock_match_insights(text: str):
+def generate_mock_match_insights():
     time.sleep(2)
 
     return {
@@ -25,7 +25,7 @@ def generate_mock_match_insights(text: str):
         ]
     }
 
-def generate_mock_document_data(text: str):
+def generate_mock_document_data():
     time.sleep(2)
 
     return {
