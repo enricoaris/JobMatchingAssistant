@@ -1,0 +1,80 @@
+services:
+  db:
+    image: ankane/pgvector
+    container_name: resume_postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=resumematcher
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pass
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+  ollama:
+    image: ollama/ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama:/root/.ollama
+
+  ollama-init:
+    image: ollama/ollama
+    depends_on:
+      - ollama
+    environment:
+      - OLLAMA_HOST=ollama:11434
+    entrypoint: >
+      /bin/sh -c "
+        echo 'Waiting 15 seconds for server to stabilize...' &&
+        sleep 15 &&
+        echo 'Attempting to pull phi3 from server at ollama:11434...' &&
+        ollama pull phi3
+      "
+  
+  ai-service:
+    build: ./ai-service
+    container_name: ai-worker-service
+    env_file:
+      - ./ai-service/.env
+    depends_on:
+      - rabbitmq
+      - ollama
+      - backend-api
+    restart: unless-stopped
+
+  backend-api:
+    build: ./backend
+    container_name: backend-api-service
+    ports:
+      - "5024:8080"
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=resumematcher;Username=user;Password=pass
+      - ASPNETCORE_URLS=http://+:8080
+      - RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - db
+      - rabbitmq
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: react-frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:5024
+
+volumes:
+  pgdata:
+  ollama:
