@@ -1,11 +1,9 @@
-node_modules/
+postgres_data/
 /build
 /dist
 .npm
 *.log
 .eslintcache
-
-
 
 # Virtual Environments
 venv/
