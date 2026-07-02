@@ -13,7 +13,7 @@ public class Matches
     public Guid MatchId { get; set; }
     public Guid ResumeId { get; set; }
     public Guid JobId { get; set; }
-    public float? Score { get; set; }
+    public float Score { get; set; }
     public List<string>? Suggestions { get; set; }
     public List<string>? MissingSkills { get; set; }
     [Column("match_level")]

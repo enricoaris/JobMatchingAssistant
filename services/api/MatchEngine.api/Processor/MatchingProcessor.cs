@@ -72,13 +72,16 @@ namespace MatchEngine.Api.Processor
                             JobId = match.JobId,
                             ResumeId = request.ResumeId,
                             CreatedAt = DateTime.UtcNow,
-                            Score = (float?)match.Score,
+                            Score = (float)match.Score,
                             MissingSkills = match.MissingSkills
                         });
 
                         matchEvents.Add(new MatchingCompletedEvent
                         {
-                            MatchId = newId
+                            MatchId = newId,
+                            ResumeId = request.ResumeId,
+                            JobId = match.JobId,
+                            SessionId = request.SessionId
                         });
                     }
 

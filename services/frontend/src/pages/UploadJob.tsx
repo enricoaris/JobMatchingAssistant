@@ -9,14 +9,14 @@ import AddJobModal from '../components/AddJobModal';
 import Navbar from '../components/Navbar';
 import { ApiService } from '../services/ApiService';
 import { JobGrid } from '../components/JobGrid';
-import type JobRow from '../components/JobGrid';
 import { SignalRContext } from '../components/SignalRProvider';
 import Swal from 'sweetalert2';
+import type JobRow from '../types/jobRow';
 
 interface ApiJob {
   id: string;
   name: string;
-  status: string;
+  status: string | number;
   vector: Boolean;
 }
 
@@ -136,12 +136,13 @@ const UploadJob: React.FC = () => {
                const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
                Swal.fire('Error', errorMessage, 'error');
                console.error("Upload failed", error)
-            }  
+            }  finally {
+               setFile(null);
+            }
          }
       }
 
       uploadJobBatch();
-
    }, [file])
 
    return (

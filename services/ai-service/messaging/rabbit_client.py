@@ -1,7 +1,7 @@
 import aio_pika
 from settings import *
 import inspect
-from enums import QueueName
+from enums.queue_name import QueueName 
 import json
 
 class RabbitClient:

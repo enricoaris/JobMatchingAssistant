@@ -53,7 +53,7 @@ public class ResumeHelper
             {
                 FilePath = filePath,
                 CreatedAt = DateTime.UtcNow,
-                Status = "processing",
+                Status = 1, // Stands for Uploaded
                 Filename = request.File.FileName
             };
 
@@ -114,7 +114,7 @@ public class ResumeHelper
             await _publisher.PublishAsync(Queues.ResumeEmbedded, new ResumeEmbeddedEvent
             {
                 ResumeId = resume.Id,
-                SessionId = request.SessionId ?? ""
+                SessionId = request.SessionId ?? null
             });
 
             return Result<Guid>.Success(resume.Id, "Saved successfully");

@@ -169,7 +169,7 @@ public class JobHelper
                 {
                     Id = j.Id,
                     Name = j.Title ?? "",
-                    Status = j.Status ?? "",
+                    Status = j.Status ?? 0,
                     Vector = (bool)(j.Embedding != null)
                 }).ToList();
 

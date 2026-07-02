@@ -48,7 +48,7 @@ public class MatchHelper
         List<MatchDetail> matchList = matches.Select(match => new MatchDetail(
             match.JobId.ToString(),
             jobsLookup.GetValueOrDefault(match.JobId) ?? "",
-            match.Score ?? 0,
+            match.Score,
             match.MatchLevel ?? "",
             match.Assessment ?? "",
             match.KeyGaps ?? new List<string>(),

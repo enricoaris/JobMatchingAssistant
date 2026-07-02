@@ -19,7 +19,7 @@ namespace MatchEngine.Api.Processor
             _hubContext = hubContext;
         }
 
-        public async Task UpdateJobStatus(Guid jobId, string status, string sessionId)
+        public async Task UpdateJobStatus(Guid jobId, int status, string sessionId)
         {
             try
             {
@@ -42,7 +42,7 @@ namespace MatchEngine.Api.Processor
             }
         }
 
-        public async Task UpdateResumeStatus(Guid resumeId, string status, string sessionId)
+        public async Task UpdateResumeStatus(Guid resumeId, int status, string sessionId)
         {
             try
             {

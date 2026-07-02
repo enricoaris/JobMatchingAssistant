@@ -5,12 +5,9 @@ import { IconButton } from '@mui/material';
 import { type GridColDef } from '@mui/x-data-grid';
 import Swal from 'sweetalert2';
 import { ApiService } from "../services/ApiService";
-
-export default interface JobRow{
-    id: string;
-    title: string;
-    status: any | null;
-}
+import type JobRow from "../types/jobRow"
+import { DocumentStatusBadge } from "./DocumentStatusBadge";
+import { isStatusProcessing, JobStatus } from "../types/documentStatus";
 
 interface JobGridProps{
     rows: JobRow[];
@@ -19,26 +16,56 @@ interface JobGridProps{
 
 export const JobGrid: React.FC<JobGridProps> = ({ rows, setRows }) => {
     const columns: GridColDef<JobRow>[] = [
-        { field: "title", headerName: "Title", flex: 2 },
+        {
+            field: "title",
+            headerName: "Title",
+            flex: 2,
+            renderCell: (params) => (
+                <span style={{fontWeight: 500, fontSize: '0.95rem'}}>
+                    {params.value}
+                </span>
+            )
+        },
         {
             field: "status",
             headerName: "Status",
             width: 140,
-            flex: 1
+            flex: 2,
+            renderCell: (params) => {
+                let statusValue = params.value;
+
+                if (typeof statusValue === 'string' && !isNaN(Number(statusValue))) {
+                    statusValue = Number(statusValue);
+                }
+
+                return (
+                    <DocumentStatusBadge
+                        documentType="job"
+                        status={statusValue}
+                        showProgress={true}
+                    />
+                )
+            }
         },
         {
             field: "actions",
             headerName: "Actions",
             type: "actions",
             width: 100,
-            renderCell: (params) => (
-                <IconButton
-                    color="error"
-                    onClick={() => handleDelete(params.id.toString())}
-                >
-                    <DeleteIcon />
-                </IconButton>
-            ),
+            renderCell: (params) => {
+                const isProcessing = isStatusProcessing('job', params.row.status);
+
+                return (
+                    <IconButton
+                        color="error"
+                        onClick={() => handleDelete(params.id.toString())}
+                        disabled={isProcessing}
+                        title={isProcessing ? "Cannot delete while processing" : "Delete job"}
+                    >
+                        <DeleteIcon />
+                    </IconButton>
+                )
+            },
         },
     ];
 
@@ -74,10 +101,21 @@ export const JobGrid: React.FC<JobGridProps> = ({ rows, setRows }) => {
 
     return (
         <div style={{ height: 500, width: "100%" }}>
-        <DataGrid
-            rows={rows}
-            columns={columns}
-        />
+            <DataGrid
+                rows={rows}
+                columns={columns}
+                pageSizeOptions={[5, 10, 25]}
+                initialState={{
+                    pagination: {paginationModel: {pageSize: 10}}
+                }}
+                getRowClassName={(params) => {
+                    if (params.row.status === JobStatus.FAILED){
+                        return 'job-row-failed'
+                    } else {
+                        return '';
+                    }
+                }}
+            />
         </div>
     );
 }

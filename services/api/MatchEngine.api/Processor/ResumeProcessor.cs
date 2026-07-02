@@ -37,7 +37,7 @@ namespace MatchEngine.Api.Processor
                     var extractedText = _pdfHelper.Extract(path);
 
                     resume.ContextText = extractedText;
-                    resume.Status = "text-extracted";
+                    resume.Status = 10; // Stands For Text Extracted
                     resume.UpdatedAt = DateTime.UtcNow;
 
                     await _dbContext.SaveChangesAsync();

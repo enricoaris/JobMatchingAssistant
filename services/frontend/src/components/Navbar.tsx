@@ -7,7 +7,7 @@ const Navbar = () => {
         <AppBar>
             <Toolbar>
                 <Typography variant="h6">
-                    Match Hub
+                    Matching Engine
                 </Typography>
 
                 <Box sx={{ flexGrow: 1 }} />

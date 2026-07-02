@@ -10,7 +10,7 @@ const Home: React.FC = () => {
             <Navbar/>
             <Typography>
                 <h1>
-                    Match Hub
+                    Matching Engine
                 </h1>
             </Typography>
         </>

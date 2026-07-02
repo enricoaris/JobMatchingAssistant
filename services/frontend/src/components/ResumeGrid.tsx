@@ -5,6 +5,8 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useNavigate } from "react-router-dom";
 import { ApiService } from "../services/ApiService";
 import Swal from "sweetalert2";
+import { DocumentStatusBadge } from "./DocumentStatusBadge";
+import { isStatusProcessing } from "../types/documentStatus";
 
 export default interface ResumeRow{
     id: string;
@@ -55,33 +57,59 @@ export const ResumeGrid: React.FC<ResumeGridProps> = ({rows, setRows}) => {
     }
 
     const columns: GridColDef<ResumeRow>[] = [
-        { field: "title", headerName: "Title", flex: 1 },
+        { 
+            field: "title",
+            headerName: "Title",
+            flex: 1
+        },
         {
             field: "status",
             headerName: "Status",
-            flex: 1
+            width: 140,
+            flex: 2,
+            renderCell: (params) => {
+                let statusValue = params.value;
+
+                if (typeof statusValue === 'string' && !isNaN(Number(statusValue))) {
+                    statusValue = Number(statusValue);
+                }
+
+                return (
+                    <DocumentStatusBadge
+                        documentType="resume"
+                        status={statusValue}
+                        showProgress={true}
+                    />
+                )
+            }
         },
         {
             field: "actions",
             headerName: "Actions",
             type: "actions",
             flex: 1,
-            renderCell: (params) => (
-                <>
-                    <IconButton
-                        color="info"
-                        onClick={() => handleViewResult(params.id.toString())}
-                    >
-                        <VisibilityIcon/>
-                    </IconButton>
-                    <IconButton
-                        color="error"
-                        onClick={() => handleDelete(params.id.toString())}
-                    >
-                        <DeleteIcon/>
-                    </IconButton>
-                </>
-            ),
+            renderCell: (params) => {
+                const isProcessing = isStatusProcessing('resume', params.row.status);
+                
+                return (
+                    <>
+                        <IconButton
+                            color="info"
+                            onClick={() => handleViewResult(params.id.toString())}
+                            disabled={isProcessing}
+                            title={isProcessing ? "Cannot view result while processing" : "View Result"}
+                        >
+                            <VisibilityIcon/>
+                        </IconButton>
+                        <IconButton
+                            color="error"
+                            onClick={() => handleDelete(params.id.toString())}
+                        >
+                            <DeleteIcon/>
+                        </IconButton>
+                    </>
+                )
+            },
         },
     ]
 

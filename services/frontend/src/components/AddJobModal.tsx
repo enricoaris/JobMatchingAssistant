@@ -8,8 +8,9 @@ import {
 } from "@mui/material";
 import { useState, type Dispatch, type SetStateAction } from "react";
 import { ApiService } from "../services/ApiService";
-import type JobRow from "./JobGrid";
+import type JobRow from "../types/jobRow";
 import Swal from 'sweetalert2';
+import { JobStatus } from "../types/documentStatus";
 
 interface JobModalProps {
   isOpen: boolean;
@@ -54,7 +55,7 @@ const AddJobModal: React.FC<JobModalProps> = ({ isOpen, onClose, sessionId, upda
         const data = await response.json();
         const jobRow: JobRow = {
             id: data,
-            status: "processing",
+            status: JobStatus.QUEUED,
             title: name
           }
 

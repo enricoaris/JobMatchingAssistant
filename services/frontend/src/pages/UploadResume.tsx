@@ -1,23 +1,33 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import { useDropzone } from "react-dropzone"
 import Swal from 'sweetalert2';
 import Navbar from "../components/Navbar";
 import { Paper, Stack, Typography } from "@mui/material";
-import {ResumeStepper} from "../components/ResumeStepper";
 import { ApiService } from "../services/ApiService";
 import { SignalRContext } from "../components/SignalRProvider";
 import { ResumeGrid } from "../components/ResumeGrid";
 import type ResumeRow from "../components/ResumeGrid";
+import { ResumeStatus } from "../types/documentStatus";
 
 const UploadResume: React.FC = () => {
     const [resumeRow, setResumeRow] = useState<ResumeRow[]>([]);
     const [file, setFile] = useState<File | null>(null);
-    const [currentId, setCurrentId] = useState<string | null>(null);
     const context = useContext(SignalRContext);
 
     if (!context) return <div>Loading connection...</div>;
 
     const { sessionId, signalRState } = context;
+
+    const mergedResumeRows = useMemo(() => {
+        const statusMap = new Map(
+            signalRState.resumeStatus.map((item) => [item.id, item.status])
+        )
+
+        return resumeRow.map(resume => ({
+         ...resume,
+         status: statusMap.get(resume.id) ?? resume.status
+      }));
+    }, [resumeRow, signalRState.resumeStatus])
 
     useEffect(() => {
         const loadData = async () => {
@@ -84,7 +94,12 @@ const UploadResume: React.FC = () => {
 
             if (response.ok){
                 var data = await response.json();
-                setCurrentId(data);
+                const resumeData: ResumeRow = {
+                    id: data,
+                    status: ResumeStatus.UPLOADED,
+                    title: file.name
+                }
+                setResumeRow((prev) => [...prev, resumeData]);
                 Swal.fire('Done!', 'Resume is being processed.', 'success');
             } else {
                 Swal.fire('Error!', 'Something went wrong..', 'error');
@@ -106,7 +121,7 @@ const UploadResume: React.FC = () => {
 
             {
                 resumeRow.length > 0
-                ? <ResumeGrid rows={resumeRow} setRows={setResumeRow}/>
+                ? <ResumeGrid rows={mergedResumeRows} setRows={setResumeRow}/>
                 : <></>
             }
             
@@ -154,12 +169,6 @@ const UploadResume: React.FC = () => {
                             Process Resume
                         </button>
                     </div>
-
-                    {/* {
-                        currentId !== null
-                        ? <ResumeStepper resumeId={currentId} resumeStatus={signalRState.resumeStatus}/> 
-                        : <></>
-                    } */}
                 </Paper>
             </Stack>
         </Stack>

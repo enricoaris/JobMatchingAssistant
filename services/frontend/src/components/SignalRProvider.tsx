@@ -2,10 +2,14 @@ import { HubConnection } from "@microsoft/signalr";
 import { useEffect, useRef, useState, createContext, type ReactNode } from "react";
 import { ApiService } from "../services/ApiService";
 import * as signalR from "@microsoft/signalr";
+import { JobStatus } from "../types/documentStatus";
 
 interface SignalRState {
     resumeStatus: any[];
-    jobStatus: any[];
+    jobStatus: Array<{
+        id: string;
+        status: JobStatus | number;
+    }>;
 }
 
 interface SignalRContextType {
@@ -58,19 +62,19 @@ export const SignalRProvider = ({ children }: {children: ReactNode}) => {
                     .withAutomaticReconnect()
                     .build()
 
-                hubConn.on("jobStatusUpdate", (data) => {
+                hubConn.on("jobStatusUpdate", (update: {id: string; status: number }) => {
                     setSignalRState(prev => ({
                         ...prev,
-                        jobStatus: [...prev.jobStatus, data]
+                        jobStatus: [...prev.jobStatus, update]
                     }));
                 })
 
-                hubConn.on("resumeStatusUpdate", (data) => {
+                hubConn.on("resumeStatusUpdate", (update: {id: string; status: number }) => {
                     console.log("status update")
-                    console.log(data)
+                    console.log(update)
                     setSignalRState(prev => ({
                         ...prev,
-                        resumeStatus: [...prev.resumeStatus, data]
+                        resumeStatus: [...prev.resumeStatus, update]
                     }))
                 })
 

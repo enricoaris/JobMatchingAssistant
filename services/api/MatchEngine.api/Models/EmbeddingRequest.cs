@@ -12,6 +12,6 @@
         public string? Seniority { get; set; }
         public List<string>? Requirements { get; set; }
         public List<string>? Highlights { get; set; }
-        public string? SessionId { get; set; }
+        public Guid? SessionId { get; set; }
     }
 }

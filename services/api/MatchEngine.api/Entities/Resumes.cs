@@ -10,7 +10,7 @@ public class Resumes
     [Key]
     public Guid Id { get; set; }
     public string FilePath { get; set; }
-    public string Status { get; set; }
+    public int? Status { get; set; }
     public string? ContextText { get; set; }
     public Vector? Embedding { get; set; }
     public DateTime? CreatedAt { get; set; }
