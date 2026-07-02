@@ -29,3 +29,6 @@ __pycache__/
 *.suo
 *.userosscache
 *.sln.docstates
+
+# Uploaded File
+services\api\MatchEngine.api\Uploads
