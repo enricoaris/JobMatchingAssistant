@@ -6,6 +6,7 @@ postgres_data/
 .eslintcache
 *.env
 .env*
+!.env.example
 
 # Virtual Environments
 venv/
