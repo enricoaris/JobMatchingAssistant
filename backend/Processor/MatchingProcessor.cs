@@ -1,9 +1,12 @@
 ﻿using MatchEngine.Api.Models;
 using Npgsql;
+using NpgsqlTypes;
+using Pgvector;
 using Resume.Shared.Data;
 using Resume.Shared.Entities;
 using Resume.Shared.Events;
 using Resume.Shared.Messaging;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace MatchEngine.Api.Processor
 {
@@ -108,36 +111,47 @@ namespace MatchEngine.Api.Processor
 
         public async Task<List<MatchScore>> GetTopMatches(Guid resumeId, int topN)
         {
-            Resumes? resume = _context.Resumes.FirstOrDefault(e => e.Id.Equals(resumeId));
-
-            if (resume == null || resume.Embedding == null)
+            try
             {
-                throw new Exception("Resume is not found.");
-            }
+                Resumes? resume = _context.Resumes.FirstOrDefault(e => e.Id.Equals(resumeId));
 
-            await using var cmd = _dataSource.CreateCommand(@"
-                select j.""Id"" , 1 - (j.""Embedding""  <=> @query) as Score
-                from ""Jobs"" j
-                order by j.""Embedding"" <=> @query
-                limit @topN
-            ");
-
-            cmd.Parameters.AddWithValue("query", resume.Embedding);
-            cmd.Parameters.AddWithValue("topN", topN);
-
-            var results = new List<MatchScore>();
-
-            await using var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
-            {
-                results.Add(new MatchScore
+                if (resume == null || resume.Embedding == null)
                 {
-                    JobId = reader.GetGuid(0),
-                    Score = reader.GetDouble(1)
-                });
+                    throw new Exception("Resume is not found.");
+                }
+
+                await using var cmd = _dataSource.CreateCommand(@"
+                    select j.""Id"" , 1 - (j.""Embedding"" <=> @query) as Score
+                    from ""Jobs"" j
+                    order by j.""Embedding"" <=> @query
+                    limit @topN
+                ");
+                //order by j.""Embedding"" <=> @query
+
+                cmd.Parameters.AddWithValue("query", resume.Embedding);
+                cmd.Parameters.AddWithValue("topN", topN);
+
+                var results = new List<MatchScore>();
+
+                await using var reader = await cmd.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                {
+                    results.Add(new MatchScore
+                    {
+                        JobId = reader.GetGuid(0),
+                        Score = reader.GetDouble(1)
+                    });
+                }
+
+                return results;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+                Console.WriteLine($"StackTrace: {ex.StackTrace}");
+                throw;
             }
 
-            return results;
         }
 
         public double CalculateSkillScore(List<string> resumeSkills, List<string> jobSkills)

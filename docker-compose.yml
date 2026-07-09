@@ -11,40 +11,45 @@ services:
       - POSTGRES_PASSWORD=pass
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
   rabbitmq:
     image: rabbitmq:3-management
     ports:
       - "5672:5672"
       - "15672:15672"
-  ollama:
-    image: ollama/ollama
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama:/root/.ollama
+  # ollama:
+  #   image: ollama/ollama
+  #   ports:
+  #     - "11434:11434"
+  #   volumes:
+  #     - ollama:/root/.ollama
 
-  ollama-init:
-    image: ollama/ollama
-    depends_on:
-      - ollama
-    environment:
-      - OLLAMA_HOST=ollama:11434
-    entrypoint: >
-      /bin/sh -c "
-        echo 'Waiting 15 seconds for server to stabilize...' &&
-        sleep 15 &&
-        echo 'Attempting to pull phi3 from server at ollama:11434...' &&
-        ollama pull phi3
-      "
+  # ollama-init:
+  #   image: ollama/ollama
+  #   depends_on:
+  #     - ollama
+  #   environment:
+  #     - OLLAMA_HOST=ollama:11434
+  #   entrypoint: >
+  #     /bin/sh -c "
+  #       echo 'Waiting 15 seconds for server to stabilize...' &&
+  #       sleep 15 &&
+  #       echo 'Attempting to pull phi3 from server at ollama:11434...' &&
+  #       ollama pull phi3
+  #     "
   
   ai-service:
     build: ./ai-service
     container_name: ai-worker-service
     env_file:
       - ./ai-service/.env
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      API_URL: http://backend-api:8080
+      LLM_MODEL_HOST: http://ollama:11434
     depends_on:
       - rabbitmq
-      - ollama
+      # - ollama
       - backend-api
     restart: unless-stopped
 

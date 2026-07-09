@@ -13,6 +13,8 @@ public class RabbitMqPublisher: IDisposable
     {
         var rabbitHost = Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? "localhost";
 
+        Console.WriteLine($"    : {rabbitHost}");
+
         _factory = new ConnectionFactory()
         {
             HostName = rabbitHost

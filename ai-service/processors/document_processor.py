@@ -4,11 +4,11 @@ from enums.queue_name import QueueName
 from enums.api_service import ApiService
 from skill_mapping import SKILLS
 from messaging.rabbit_client import RabbitClient
-from llm_service import (
-    generate_embedding, normalize_text, extract_features_with_llm,
-    extract_skills_with_dict, basic_cleanup_skill, generate_highlights,
-    generate_requirements, generate_assessments, generate_suggestions
+from vector_embeddings import (
+    generate_embedding, normalize_text, basic_cleanup_skill, extract_skills_with_dict
 )
+from llm.factory import LLMFactory
+from llm.interface import LLMProvider
 from settings import USE_MOCK_LLM
 from mock_service import MockDocumentProcessor
 import logging
@@ -28,6 +28,8 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
+
+llm: LLMProvider = LLMFactory.create_provider()
 
 async def update_status(
     status_update: StatusUpdate,
@@ -102,28 +104,6 @@ async def process_document(
     }
 
     try:
-        if USE_MOCK_LLM:
-            mock_processor = MockDocumentProcessor(
-                update_status_callback=update_status,
-                client=client,
-                update_queue=update_queue,
-                document_id=document_id,
-                session_id=session_id,
-                document_type=document_type
-            )
-
-            mock_data = await mock_processor.process_document(text=extracted["text"])
-
-            payload = {
-                "Id": document_id,
-                "DocumentType": document_type,
-                "SessionId": session_id,
-                **mock_data  # Unpack mock data
-            }
-
-            response = requests.post(target_api, json=payload, verify=False)
-            return response
-
         await update_status(
             StatusUpdate(
                 status=StatusClass.GENERATING_EMBEDDING,
@@ -152,7 +132,7 @@ async def process_document(
         logger.info("Extracting Skills.", extra=log_extra)
         
         dict_skills = extract_skills_with_dict(normalized_text, skills_dict=SKILLS)
-        llm_features = extract_features_with_llm(normalized_text)
+        llm_features = llm.extract_features_with_llm(normalized_text)
 
         merged_skills = merge_skills(dict_skills, llm_features["skills"])
         normalized_skills = []
@@ -168,7 +148,8 @@ async def process_document(
             client=client,
             update_queue=update_queue
         )
-        requirements = generate_requirements(normalized_text)
+       
+        requirements = llm.generate_requirements(normalized_text)
         
         await update_status(
             StatusUpdate(
@@ -179,7 +160,7 @@ async def process_document(
             client=client,
             update_queue=update_queue
         )
-        highlights = generate_highlights(normalized_text)
+        highlights = llm.generate_highlights(normalized_text)
 
         payload = {
             "Id": document_id,
@@ -298,8 +279,8 @@ async def process_insights(message:any, client: RabbitClient):
             assessments = mock_insights["assessment"]
             suggestions = mock_insights["suggestions"]
         else:
-            assessments = generate_assessments(match_input)
-            suggestions = generate_suggestions(match_input)
+            assessments = llm.generate_assessments(match_input)
+            suggestions = llm.generate_suggestions(match_input)
 
         payload = {
             "MatchId": match_id,
