@@ -1,24 +1,25 @@
 # Resume-Job Matching Engine
 
-AI-powered tool that matches resumes to job descriptions using semantic similarity and LLMs.
+End-to-end system that extracts and matches skills from resumes and job descriptions using LLMs and semantic similarity.
 
 ## Demo Video
-
 [Link to video]
 
 ## Features
-
-- Upload resumes (PDF/DOCX) and job descriptions
-- Semantic similarity matching using LLMs
-- Asynchronous processing with RabbitMQ
-- Real-time progress updates via SignalR
-- Pluggable LLM architecture (local or cloud providers)
-- Match scoring with keyword highlighting
+- Analyze resumes and job descriptions using Large Language Models (LLMs)
+- Extract skills, experience, highlights, and job requirements
+- Hybrid extraction using LLMs and a rule-based skills dictionary
+- Generate semantic embeddings for resumes and job descriptions
+- Match resumes to jobs using vector similarity
+- Generate AI-powered match summaries and recommendations
+- Extract text from PDF resumes
+- Process documents asynchronously using background workers
+- Support pluggable LLM providers (local or cloud)
+- Mock mode for development and demonstrations
 
 ## Tech Stack
-
 **Backend API:** .NET (C#)  
-**AI Service:** Python (consumes RabbitMQ events)  
+**AI Service:** Python (LLM integration, embedding generation)  
 **Frontend:** React, TypeScript, MUI  
 **Message Queue:** RabbitMQ  
 **Real-time:** SignalR  
@@ -27,11 +28,9 @@ AI-powered tool that matches resumes to job descriptions using semantic similari
 ## Quick Start
 
 ### Prerequisites
-
 - Docker and Docker Compose
 
 ### Run with Docker
-
 ```bash
 # Clone the repository
 git clone https://github.com/enricoaris/resume-matcher
