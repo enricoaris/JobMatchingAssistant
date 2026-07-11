@@ -10,7 +10,6 @@ from vector_embeddings import (
 from llm.factory import LLMFactory
 from llm.interface import LLMProvider
 from settings import USE_MOCK_LLM
-from mock_service import MockDocumentProcessor
 import logging
 import time
 from factories.status_factory import StatusFactory
@@ -272,15 +271,16 @@ async def process_insights(message:any, client: RabbitClient):
             }
         }
 
-        if USE_MOCK_LLM:
-            mock_processor = MockDocumentProcessor(update_status_callback=update_status)
-            mock_insights = mock_processor._generate_mock_match_insights()
+        # if USE_MOCK_LLM:
+        #     mock_processor = MockDocumentProcessor(update_status_callback=update_status)
+        #     mock_insights = mock_processor._generate_mock_match_insights()
 
-            assessments = mock_insights["assessment"]
-            suggestions = mock_insights["suggestions"]
-        else:
-            assessments = llm.generate_assessments(match_input)
-            suggestions = llm.generate_suggestions(match_input)
+
+        #     assessments = mock_insights["assessment"]
+        #     suggestions = mock_insights["suggestions"]
+        # else:
+        assessments = llm.generate_assessments(match_input)
+        suggestions = llm.generate_suggestions(match_input)
 
         payload = {
             "MatchId": match_id,
