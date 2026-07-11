@@ -3,7 +3,7 @@
 End-to-end system that extracts and matches skills from resumes and job descriptions using LLMs and semantic similarity.
 
 ## Demo Video
-[Link to video]
+[https://youtu.be/pS8qNTXYTX4]
 
 ## Features
 - Analyze resumes and job descriptions using Large Language Models (LLMs)
